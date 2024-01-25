@@ -36,6 +36,7 @@ namespace ReadGeoJSON
             // All parameters must have the correct access type. If you want 
             // to import lists or trees of values, modify the ParamAccess flag.
             pManager.AddTextParameter("Path", "P", "Path of File", GH_ParamAccess.item);
+            pManager.AddBooleanParameter("ImportInModelSpace", "IIMS", "True if the geometries and properties should be imported directly into the model space of Rhino", GH_ParamAccess.item);
 
             // If you want to change properties of certain parameters, 
             // you can use the pManager instance to access them by index:
@@ -49,7 +50,13 @@ namespace ReadGeoJSON
         {
             // Use the pManager object to register your output parameters.
             // Output parameters do not have default values, but they too must have the correct access type.
-            pManager.AddTextParameter("Message", "Msg", "Message", GH_ParamAccess.item);
+            pManager.AddTextParameter("Message", "Msg", "Custom message to display", GH_ParamAccess.item);
+            pManager.AddTextParameter("Type", "Type", @"Type of GeoJSON, expect ""Feature Collection""", GH_ParamAccess.item);
+            pManager.AddTextParameter("Name", "Name", "Name of the GeoJSON layer", GH_ParamAccess.item);
+            pManager.AddTextParameter("CRS", "CRS", "Name of the coordinate reference system", GH_ParamAccess.item);
+            pManager.AddGeometryParameter("Geometries", "Geo", "Underlying geometries", GH_ParamAccess.list);
+            pManager.AddTextParameter("PropertyNames", "PNames", "List of property names", GH_ParamAccess.list);
+            //pManager.AddTextParameter("PropertiesDataFlow", "PDF", "List of properties data flow", GH_ParamAccess.list);
 
             // Sometimes you want to hide a specific parameter from the Rhino preview.
             // You can use the HideParameter() method as a quick way:
@@ -66,10 +73,13 @@ namespace ReadGeoJSON
             // First, we need to retrieve all data from the input parameters.
             // We'll start by declaring variables and assigning them starting values.
             string path = "";
+            bool importInModelSpace = false;
+
 
             // Then we need to access the input parameters individually. 
             // When data cannot be extracted from a parameter, we should abort this method.
             if (!DA.GetData(0, ref path)) return;
+            if (!DA.GetData(1, ref importInModelSpace)) return;
 
             if (path.Length <= 1)
             {
@@ -78,10 +88,14 @@ namespace ReadGeoJSON
 
             // We're set to create the spiral now. To keep the size of the SolveInstance() method small, 
             // The actual functionality will be in a different method:
-            ProcessConversion pc = new ProcessConversion(path);
+            Importer importer = new Importer(path);
 
             // Finally assign the spiral to the output parameter.
-            DA.SetData(0, "{" + String.Join(", ", pc.Result.Keys) + "}");
+            DA.SetData(0, "{" + String.Join(", ", importer.Result.Keys) + "}");
+            DA.SetData(1, importer.Type);
+            DA.SetData(2, importer.Name);
+            DA.SetData(3, importer.CRSName);
+            DA.SetData(5, importer.PropertyNames);
         }
 
         /// <summary>

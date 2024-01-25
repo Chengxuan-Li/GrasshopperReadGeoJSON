@@ -63,6 +63,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Converter.cs" />
+    <Compile Include="Importer.cs" />
     <Compile Include="ReadGeoJSONComponent.cs" />
     <Compile Include="ReadGeoJSONInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

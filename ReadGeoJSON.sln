@@ -7,7 +7,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReadGeoJSON", "ReadGeoJSON.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{90D8110A-80F8-4D11-8A21-A1D610B2155A}"
 	ProjectSection(SolutionItems) = preProject
+		test\extracted_test.geojson = test\extracted_test.geojson
 		README.md = README.md
+		test\site_boundary_1km.geojson = test\site_boundary_1km.geojson
 	EndProjectSection
 EndProject
 Global
