@@ -100,6 +100,31 @@ namespace ReadGeoJSON
             if (geometryDictionary.TryGetValue("type", out geometryType)) thisGeometryType = geometryType.ToString();
             if (geometryDictionary.TryGetValue("coordinates", out coordinates))
             {
+                if (thisGeometryType == "Point")
+                {
+                    geometry = GeneratePoint(coordinates);
+                    return;
+                }
+                if (thisGeometryType == "LineString")
+                {
+                    geometry = GenerateLineString(coordinates);
+                    return;
+                }
+                if (thisGeometryType == "Polygon")
+                {
+                    geometry = GeneratePolygon(coordinates);
+                    return;
+                }
+                if (thisGeometryType == "MultiPoint")
+                {
+                    geometry = GenerateMultiPoint(coordinates);
+                    return;
+                }
+                if (thisGeometryType == "MultiLineString")
+                {
+                    geometry = GenerateMultiLineString(coordinates);
+                    return;
+                }
                 if (thisGeometryType == "MultiPolygon")
                 {
                     geometry = GenerateMultiPolygon(coordinates);
@@ -107,6 +132,92 @@ namespace ReadGeoJSON
                 }    
             }
             geometry = null; 
+        }
+
+
+        Point GeneratePoint(object coordinates)
+        {
+            if (coordinates is JArray)
+            {
+                var coordinate = (coordinates as JArray).ToObject<double[]>();
+                return new Point(new Point3d(coordinate[0], coordinate[1], coordinate.Length >= 3 ? coordinate[2] : 0));
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        PolylineCurve GenerateLineString(object coordinates)
+        {
+            if (coordinates is JArray)
+            {
+                var coordinatesArray = (coordinates as JArray).ToObject<double[][]>();
+                List<Point3d> points = new List<Point3d>();
+                foreach (double[] coordinate in coordinatesArray)
+                {
+                    points.Add(new Point3d(coordinate[0], coordinate[1], coordinate.Length >= 3 ? coordinate[2] : 0));
+                }
+
+                return new Polyline(points).ToPolylineCurve();
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        PolylineCurve GeneratePolygon(object coordinates)
+        {
+            if (coordinates is JArray)
+            {
+                var coordinatesArray = (coordinates as JArray).ToObject<double[][][]>();
+                var cdnts = coordinatesArray[0];// TODO Polygon Topo
+                List<Point3d> points = new List<Point3d>();
+                foreach (double[] coordinate in cdnts)
+                {
+                    points.Add(new Point3d(coordinate[0], coordinate[1], coordinate.Length == 3 ? coordinate[2] : 0));
+                }
+
+                return new Polyline(points).ToPolylineCurve();
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        PolylineCurve GenerateMultiLineString(object coordinates)
+        {
+            if (coordinates is JArray)
+            {
+                var coordinatesArray = (coordinates as JArray).ToObject<double[][][]>();
+                List<Point3d> points = new List<Point3d>();
+                foreach (double[] coordinate in coordinatesArray[0])
+                {
+                    points.Add(new Point3d(coordinate[0], coordinate[1], coordinate.Length >= 3 ? coordinate[2] : 0));
+                }
+
+                return new Polyline(points).ToPolylineCurve();
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        Point GenerateMultiPoint(object coordinates)
+        {
+            if (coordinates is JArray)
+            {
+                var coordinatesArray = (coordinates as JArray).ToObject<double[][]>();
+                var coordinate = coordinatesArray[0];// TODO Polygon Topo
+                return new Point(new Point3d(coordinate[0], coordinate[1], coordinate.Length >= 3 ? coordinate[2] : 0));
+            }
+            else
+            {
+                return null;
+            }
         }
 
         PolylineCurve GenerateMultiPolygon(object coordinates)
@@ -118,7 +229,7 @@ namespace ReadGeoJSON
                 List<Point3d> points = new List<Point3d>();
                 foreach (double[] coordinate in cdnts)
                 {
-                    points.Add(new Point3d(coordinate[0], coordinate[1], coordinate[2]));
+                    points.Add(new Point3d(coordinate[0], coordinate[1], coordinate.Length == 3? coordinate[2]: 0));
                 }
                 
                 return new Polyline(points).ToPolylineCurve();
