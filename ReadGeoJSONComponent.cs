@@ -54,8 +54,10 @@ namespace ReadGeoJSON
             pManager.AddTextParameter("Type", "Type", @"Type of GeoJSON, expect ""Feature Collection""", GH_ParamAccess.item);
             pManager.AddTextParameter("Name", "Name", "Name of the GeoJSON layer", GH_ParamAccess.item);
             pManager.AddTextParameter("CRS", "CRS", "Name of the coordinate reference system", GH_ParamAccess.item);
+            pManager.AddTextParameter("GeometryType", "GType", "Geometry type of the first feature detected", GH_ParamAccess.item);
             pManager.AddGeometryParameter("Geometries", "Geo", "Underlying geometries", GH_ParamAccess.list);
             pManager.AddTextParameter("PropertyNames", "PNames", "List of property names", GH_ParamAccess.list);
+            pManager.AddTextParameter("Guids", "Guids", "List of Guids", GH_ParamAccess.list);
             //pManager.AddTextParameter("PropertiesDataFlow", "PDF", "List of properties data flow", GH_ParamAccess.list);
 
             // Sometimes you want to hide a specific parameter from the Rhino preview.
@@ -73,13 +75,14 @@ namespace ReadGeoJSON
             // First, we need to retrieve all data from the input parameters.
             // We'll start by declaring variables and assigning them starting values.
             string path = "";
+            
             bool importInModelSpace = false;
 
 
             // Then we need to access the input parameters individually. 
             // When data cannot be extracted from a parameter, we should abort this method.
             if (!DA.GetData(0, ref path)) return;
-            if (!DA.GetData(1, ref importInModelSpace)) return;
+            DA.GetData(1, ref importInModelSpace);
 
             if (path.Length <= 1)
             {
@@ -88,14 +91,17 @@ namespace ReadGeoJSON
 
             // We're set to create the spiral now. To keep the size of the SolveInstance() method small, 
             // The actual functionality will be in a different method:
-            Importer importer = new Importer(path);
+            Importer importer = new Importer(path, importInModelSpace);
 
             // Finally assign the spiral to the output parameter.
-            DA.SetData(0, "{" + String.Join(", ", importer.Result.Keys) + "}");
+            DA.SetData(0, importer.Msg);
             DA.SetData(1, importer.Type);
             DA.SetData(2, importer.Name);
             DA.SetData(3, importer.CRSName);
-            DA.SetData(5, importer.PropertyNames);
+            DA.SetData(4, importer.GeometryType);
+            DA.SetDataList(5, importer.Geometries);
+            DA.SetDataList(6, importer.PropertyNames);
+            DA.SetDataList(7, importer.GuidStrings);
         }
 
         /// <summary>
