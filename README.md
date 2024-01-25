@@ -1,2 +1,2 @@
 # GrasshopperReadGeoJSON
-Grasshopper assembly to read '''.GeoJSON''' files, using '''Newtownsoft.Json'''
+Grasshopper assembly to read ```.GeoJSON``` files, using ```Newtownsoft.Json```
